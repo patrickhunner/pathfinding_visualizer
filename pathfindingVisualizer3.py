@@ -1,7 +1,3 @@
-# from http.client import FOUND
-# from tracemalloc import start
-# from turtle import back, window_height, window_width
-# from xmlrpc.client import FastParser
 import pygame
 import sys
 from sys import exit
@@ -10,7 +6,7 @@ pygame.init()
 clock = pygame.time.Clock()
 
 class Algorithm():
-    def __init__(self, done = False, board_width = 38, board_height = 30, board = [], mouse_down = False, start_placed = False, end_placed = False, found = False, go = False, starting__coord = [], end_coord = [], dijkstra_algorithm = False, a_star_algorithm = False, value = 0):
+    def __init__(self, done = False, board_width = 38, board_height = 30, board = [], mouse_down = False, start_placed = False, end_placed = False, found = False, go = True, starting__coord = [], end_coord = [], dijkstra_algorithm = False, a_star_algorithm = False, value = 0):
         self.board_width = board_width
         self.board_height = board_height
         self.board = board
@@ -103,7 +99,36 @@ class Algorithm():
                 # elif self.a_star_algorithm == True:
                 #     return
         pygame.display.update()
-        
+
+    def retrace(self,peripheral):
+        print("made it")
+        print(peripheral)
+        if peripheral == []:
+            peripheral = self.end_coord
+        new_peripherals = []
+        for nodes in peripheral:
+            peripheral_list = [(nodes[0] + 1,nodes[1]),(nodes[0],nodes[1] + 1),(nodes[0] - 1,nodes[1]),(nodes[0],nodes[1] - 1)]
+            for poss in peripheral_list:
+                print(self.board[poss[1]][poss[0]][0])
+                print(self.value)
+                if self.done == True:
+                    return
+                if poss[0] > 37 or poss[0] < 0 or poss[1] > 29 or poss[1] < 0 or self.done == True:
+                    pass
+                elif self.board[poss[1]][poss[0]][1] == 'start':
+                    self.go = False
+                    return
+                elif self.board[poss[1]][poss[0]][0] == self.value:
+                    self.board[poss[1]][poss[0]][1] = 'retrace'
+                    self.done = True
+                    if [poss[0],poss[1]] not in new_peripherals:
+                        new_peripherals.append([poss[0],poss[1]])
+                        break
+        self.fill_in_visited()
+        if self.go == True:
+            self.retrace(new_peripherals)
+        else:
+            return
 
 class Dijkstra(Algorithm):
     def __init__(self):
@@ -120,6 +145,7 @@ class Dijkstra(Algorithm):
             for poss in peripheral_list:
                 if self.found == True:
                     self.retrace(self.end_coord)
+                    return
                 if poss[0] > 37 or poss[0] < 0 or poss[1] > 29 or poss[1] < 0:
                     pass
                 elif self.board[poss[1]][poss[0]][1] == 'ending':
@@ -135,26 +161,6 @@ class Dijkstra(Algorithm):
                         self.new_peripherals.append([poss[0],poss[1]])
         self.fill_in_visited()
         self.find_next_nodes(self.new_peripherals)
-
-    def retrace(self,peripheral):
-        new_peripherals = []
-        for nodes in peripheral:
-            peripheral_list = [(nodes[0] + 1,nodes[1]),(nodes[0],nodes[1] + 1),(nodes[0] - 1,nodes[1]),(nodes[0],nodes[1] - 1)]
-            for poss in peripheral_list:
-                if poss[0] > 37 or poss[0] < 0 or poss[1] > 29 or poss[1] < 0 or self.done == True:
-                    pass
-                elif self.board[poss[1]][poss[0]][1] == 'start':
-                    self.go = False
-                    return
-                elif self.board[poss[1]][poss[0]][0] == self.value:
-                    self.board[poss[1]][poss[0]][1] = 'retrace'
-                    self.done = True
-                    if [poss[0],poss[1]] not in new_peripherals:
-                        new_peripherals.append([poss[0],poss[1]])
-                        break
-        self.fill_in_visited()
-        while self.go == True:
-            self.retrace(new_peripherals)
 
 class A_star(Algorithm):
     def __init__(self):
@@ -217,7 +223,3 @@ while True:
 
 
     pygame.display.update()
-
-
-
-
